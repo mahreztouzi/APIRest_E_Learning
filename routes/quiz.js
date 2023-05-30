@@ -1,34 +1,40 @@
 const express = require("express");
-const TdController = require("../controllers/td.controller");
+const QuizController = require("../controllers/quiz.controller");
 const coursUploader = require("../helpers/cours-uploader");
 const checkAuth = require("../middleware/check-auth");
 const router = express.Router();
-// poster un nouveau td
+// poster un nouveau Quiz
 router.post(
   "/uploads",
   checkAuth.checkAuth,
   coursUploader.upload.single("pdf"),
-  TdController.uploadTd
+  QuizController.uploadQuiz
 );
 // poster une correction ou modifier une correction
 router.patch(
   "/uploads/correction/:id",
   checkAuth.checkAuth,
-  TdController.TestuploadUpdate,
+  QuizController.QuizuploadUpdate,
   coursUploader.upload.single("pdf"),
-  TdController.uploadTdCorrection
+  QuizController.uploadQuizCorrection
 );
-// mise a jour td
+// mise a jour Quiz
 router.patch(
   "/uploads/:id",
   checkAuth.checkAuth,
-  TdController.TestuploadUpdate,
+  QuizController.QuizuploadUpdate,
   coursUploader.upload.single("pdf"),
-  TdController.updateTd
+  QuizController.updateQuiz
 );
-// afficher un td
-router.get("/:id", checkAuth.checkAuth, TdController.show);
+
 // supprimer un td
-router.delete("/uploads/:id", checkAuth.checkAuth, TdController.deleteTd);
+router.delete(
+  "/uploads/:id",
+  checkAuth.checkAuth,
+  QuizController.QuizuploadUpdate,
+  QuizController.deleteQuiz
+);
+// afficher un Test
+router.get("/:id", checkAuth.checkAuth, QuizController.show);
 
 module.exports = router;

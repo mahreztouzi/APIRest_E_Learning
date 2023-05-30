@@ -1,42 +1,42 @@
 const models = require("../models");
 const fs = require("fs");
 const path = require("path");
-//  cree un nouveau Td
-function uploadTd(req, res) {
-  const Td = {
+//  cree un nouveau Quiz
+function uploadQuiz(req, res) {
+  const Quiz = {
     namePdf: req.file.filename,
     description: req.body.description,
     title: req.body.title,
     idEnseignant: req.userData.userId,
   };
 
-  models.Td.create(Td)
+  models.Quiz.create(Quiz)
     .then((result) => {
       res.status(201).json({
-        message: "Td créé avec succès",
+        message: "Quiz créé avec succès",
         cours: result,
       });
     })
     .catch((err) => {
       res.status(500).json({
-        message: "Une erreur s'est produite lors de la création du cours",
+        message: "Une erreur s'est produite lors de la création du Quiz",
         error: err,
       });
     });
 }
-//  suppression d'un td
-function deleteTd(req, res) {
+//  suppression d'un Quiz
+function deleteQuiz(req, res) {
   const TdId = req.params.id;
 
-  models.Td.findByPk(TdId)
-    .then((Td) => {
-      if (!Td) {
+  models.Quiz.findByPk(TdId)
+    .then((Test) => {
+      if (!Test) {
         return res.status(404).json({
-          message: "Td non trouvé",
+          message: "Test non trouvé",
         });
       }
 
-      const filePath = path.join(__dirname, "../uploads", Td.namePdf);
+      const filePath = path.join(__dirname, "../uploads", Test.namePdf);
 
       // Supprimer le fichier du dossier d'upload
       fs.unlink(filePath, (err) => {
@@ -45,11 +45,11 @@ function deleteTd(req, res) {
         }
       });
 
-      if (Td.namePdfCorrection) {
+      if (Test.namePdfCorrection) {
         const filePathCorrection = path.join(
           __dirname,
           "../uploads",
-          Td.namePdfCorrection
+          Test.namePdfCorrection
         );
 
         // Supprimer le fichier de correction du dossier d'upload
@@ -64,29 +64,28 @@ function deleteTd(req, res) {
       }
 
       // Supprimer le cours de la base de données
-      Td.destroy()
+      Test.destroy()
         .then(() => {
           res.status(200).json({
-            message: "Td supprimé avec succès",
+            message: "Quiz supprimé avec succès",
           });
         })
         .catch((err) => {
           res.status(500).json({
-            message:
-              "Une erreur s'est produite lors de la suppression du cours",
+            message: "Une erreur s'est produite lors de la suppression du Quiz",
             error: err,
           });
         });
     })
     .catch((err) => {
       res.status(500).json({
-        message: "Une erreur s'est produite lors de la recherche du cours",
+        message: "Une erreur s'est produite lors de la recherche du Quiz",
         error: err,
       });
     });
 }
 //  ajouter la correction
-function uploadTdCorrection(req, res, next) {
+function uploadQuizCorrection(req, res, next) {
   const id = req.params.id;
   const userId = req.userData.userId;
 
@@ -100,7 +99,7 @@ function uploadTdCorrection(req, res, next) {
     updatedValue.namePdfCorrection = req.file.filename;
 
     // Vérifier si le cours existe et s'il a déjà un fichier PDF
-    models.Td.findOne({ where: { id: id, idEnseignant: userId } })
+    models.Quiz.findOne({ where: { id: id, idEnseignant: userId } })
       .then((td) => {
         if (td) {
           // S'il y a déjà un fichier PDF, supprimer l'ancien fichier
@@ -122,41 +121,41 @@ function uploadTdCorrection(req, res, next) {
         }
 
         // Mettre à jour les informations du cours
-        models.Td.update(updatedValue, {
+        models.Quiz.update(updatedValue, {
           where: { id: id, idEnseignant: userId },
         })
           .then((result) => {
             if (result == 1) {
               res.status(200).json({
-                message: "Td ajouté avec succès",
+                message: "Quiz ajouté avec succès",
                 cours: updatedValue,
               });
             } else {
-              res.status(404).json({ message: "Td non trouvé" });
+              res.status(404).json({ message: "Quiz non trouvé" });
             }
           })
           .catch((err) => {
             res.status(500).json({
               message:
-                "Une erreur s'est produite lors de la mise à jour du cours",
+                "Une erreur s'est produite lors de la mise à jour du Quiz",
               error: err,
             });
           });
       })
       .catch((err) => {
         console.error(
-          "Une erreur s'est produite lors de la recherche du cours :",
+          "Une erreur s'est produite lors de la recherche du Quiz :",
           err
         );
         res.status(500).json({
-          message: "Une erreur s'est produite lors de la mise à jour du cours",
+          message: "Une erreur s'est produite lors de la mise à jour du Quiz",
           error: err,
         });
       });
   }
 }
-//  mise a jour du fichier td ou les information
-function updateTd(req, res, next) {
+//  mise a jour du fichier Quiz ou les information
+function updateQuiz(req, res, next) {
   const id = req.params.id;
   const userId = req.userData.userId;
 
@@ -171,12 +170,16 @@ function updateTd(req, res, next) {
     updatedValue.namePdf = req.file.filename;
 
     // Vérifier si le cours existe et s'il a déjà un fichier PDF
-    models.Td.findOne({ where: { id: id, idEnseignant: userId } })
-      .then((td) => {
-        if (td) {
+    models.Quiz.findOne({ where: { id: id, idEnseignant: userId } })
+      .then((test) => {
+        if (test) {
           // S'il y a déjà un fichier PDF, supprimer l'ancien fichier
-          if (td.namePdf) {
-            const oldFilePath = path.join(__dirname, "../uploads", td.namePdf);
+          if (test.namePdf) {
+            const oldFilePath = path.join(
+              __dirname,
+              "../uploads",
+              test.namePdf
+            );
             fs.unlink(oldFilePath, (err) => {
               if (err) {
                 console.error(
@@ -188,24 +191,24 @@ function updateTd(req, res, next) {
           }
         }
 
-        // Mettre à jour les informations du cours
-        models.Td.update(updatedValue, {
+        // Mettre à jour les informations du Quiz
+        models.Quiz.update(updatedValue, {
           where: { id: id, idEnseignant: userId },
         })
           .then((result) => {
             if (result == 1) {
               res.status(200).json({
-                message: "Td mis à jour avec succès",
+                message: "Test mis à jour avec succès",
                 cours: updatedValue,
               });
             } else {
-              res.status(404).json({ message: "Cours non trouvé" });
+              res.status(404).json({ message: "Quiz non trouvé" });
             }
           })
           .catch((err) => {
             res.status(500).json({
               message:
-                "Une erreur s'est produite lors de la mise à jour du cours",
+                "Une erreur s'est produite lors de la mise à jour du Quiz",
               error: err,
             });
           });
@@ -222,17 +225,17 @@ function updateTd(req, res, next) {
       });
   } else {
     // Mettre à jour les informations du cours sans changer le fichier PDF
-    models.Td.update(updatedValue, {
+    models.Quiz.update(updatedValue, {
       where: { id: id, idEnseignant: userId },
     })
       .then((result) => {
         if (result == 1) {
           res.status(200).json({
-            message: "Td mis à jour avec succès",
+            message: "Quiz mis à jour avec succès",
             cours: updatedValue,
           });
         } else {
-          res.status(404).json({ message: "Td non trouvé" });
+          res.status(404).json({ message: "Quiz non trouvé" });
         }
       })
       .catch((err) => {
@@ -243,34 +246,10 @@ function updateTd(req, res, next) {
       });
   }
 }
-
-//  tester sur l'existance d'un cours avant de faire la mise a jour
-function TestuploadUpdate(req, res, next) {
-  const id = req.params.id;
-  const userId = req.userData.userId;
-
-  models.Td.findOne({ where: { id: id, idEnseignant: userId } })
-    .then((td) => {
-      if (!td) {
-        return res.status(404).json({ message: "td non trouvé" });
-      } else {
-        // Votre logique de téléchargement du fichier PDF ici
-        // Vous pouvez utiliser req.file pour accéder au fichier téléchargé
-
-        next(); // Appeler la fonction suivante dans le flux de la requête
-      }
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: "Une erreur s'est produite lors de la vérification du cours",
-        error: err,
-      });
-    });
-}
-// afficher un Td specifique existant sur la bdd
+// afficher un Quiz specifique existant sur la bdd
 function show(req, res) {
   const id = req.params.id;
-  models.Td.findByPk(id)
+  models.Quiz.findByPk(id)
     .then((result) => {
       {
         result
@@ -285,12 +264,34 @@ function show(req, res) {
       });
     });
 }
+//  tester sur l'existance d'un Quiz avant de faire la mise a jour
+function QuizuploadUpdate(req, res, next) {
+  const id = req.params.id;
+  const userId = req.userData.userId;
 
+  models.Quiz.findOne({ where: { id: id, idEnseignant: userId } })
+    .then((td) => {
+      if (!td) {
+        return res.status(404).json({ message: "Quiz non trouvé" });
+      } else {
+        // Votre logique de téléchargement du fichier PDF ici
+        // Vous pouvez utiliser req.file pour accéder au fichier téléchargé
+
+        next(); // Appeler la fonction suivante dans le flux de la requête
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Une erreur s'est produite lors de la vérification du cours",
+        error: err,
+      });
+    });
+}
 module.exports = {
-  uploadTd: uploadTd,
-  deleteTd: deleteTd,
-  uploadTdCorrection: uploadTdCorrection,
-  TestuploadUpdate: TestuploadUpdate,
-  updateTd: updateTd,
+  uploadQuiz: uploadQuiz,
+  deleteQuiz: deleteQuiz,
+  uploadQuizCorrection: uploadQuizCorrection,
+  QuizuploadUpdate: QuizuploadUpdate,
+  updateQuiz: updateQuiz,
   show: show,
 };

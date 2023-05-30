@@ -19,6 +19,7 @@ router.patch(
   coursUploader.upload.single("pdf"),
   coursController.updateCours
 );
+router.get("/:id", checkAuth.checkAuth, coursController.show);
 router.get("/uploads", coursController.showAllTitleCours);
 
 module.exports = router;

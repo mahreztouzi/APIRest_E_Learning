@@ -1,5 +1,5 @@
 const express = require("express");
-const TdController = require("../controllers/td.controller");
+const TestController = require("../controllers/test.controller");
 const coursUploader = require("../helpers/cours-uploader");
 const checkAuth = require("../middleware/check-auth");
 const router = express.Router();
@@ -8,27 +8,33 @@ router.post(
   "/uploads",
   checkAuth.checkAuth,
   coursUploader.upload.single("pdf"),
-  TdController.uploadTd
+  TestController.uploadTest
 );
 // poster une correction ou modifier une correction
 router.patch(
   "/uploads/correction/:id",
   checkAuth.checkAuth,
-  TdController.TestuploadUpdate,
+  TestController.TestuploadUpdate,
   coursUploader.upload.single("pdf"),
-  TdController.uploadTdCorrection
+  TestController.uploadTestCorrection
 );
 // mise a jour td
 router.patch(
   "/uploads/:id",
   checkAuth.checkAuth,
-  TdController.TestuploadUpdate,
+  TestController.TestuploadUpdate,
   coursUploader.upload.single("pdf"),
-  TdController.updateTd
+  TestController.updateTest
 );
-// afficher un td
-router.get("/:id", checkAuth.checkAuth, TdController.show);
+
 // supprimer un td
-router.delete("/uploads/:id", checkAuth.checkAuth, TdController.deleteTd);
+router.delete(
+  "/uploads/:id",
+  checkAuth.checkAuth,
+  TestController.TestuploadUpdate,
+  TestController.deleteTest
+);
+// afficher un Test
+router.get("/:id", checkAuth.checkAuth, TestController.show);
 
 module.exports = router;

@@ -1,21 +1,19 @@
 const models = require("../models");
 const fs = require("fs");
 const path = require("path");
-//  cree un nouveau cours
-function upload(req, res) {
-  const cours = {
+//  cree un nouveau Test
+function uploadTest(req, res) {
+  const Test = {
     namePdf: req.file.filename,
     description: req.body.description,
     title: req.body.title,
     idEnseignant: req.userData.userId,
   };
 
-  console.log(req.userData);
-
-  models.Cours.create(cours)
+  models.Test.create(Test)
     .then((result) => {
       res.status(201).json({
-        message: "Cours créé avec succès",
+        message: "Test créé avec succès",
         cours: result,
       });
     })
@@ -26,19 +24,19 @@ function upload(req, res) {
       });
     });
 }
-//  suppresion d'un cours
-function deleteCours(req, res) {
-  const coursId = req.params.id;
+//  suppression d'un test
+function deleteTest(req, res) {
+  const TdId = req.params.id;
 
-  models.Cours.findByPk(coursId)
-    .then((cours) => {
-      if (!cours) {
+  models.Test.findByPk(TdId)
+    .then((Test) => {
+      if (!Test) {
         return res.status(404).json({
-          message: "Cours non trouvé",
+          message: "Test non trouvé",
         });
       }
 
-      const filePath = path.join(__dirname, "../uploads", cours.namePdf);
+      const filePath = path.join(__dirname, "../uploads", Test.namePdf);
 
       // Supprimer le fichier du dossier d'upload
       fs.unlink(filePath, (err) => {
@@ -47,12 +45,29 @@ function deleteCours(req, res) {
         }
       });
 
+      if (Test.namePdfCorrection) {
+        const filePathCorrection = path.join(
+          __dirname,
+          "../uploads",
+          Test.namePdfCorrection
+        );
+
+        // Supprimer le fichier de correction du dossier d'upload
+        fs.unlink(filePathCorrection, (err) => {
+          if (err) {
+            console.error(
+              "Erreur lors de la suppression du fichier de correction :",
+              err
+            );
+          }
+        });
+      }
+
       // Supprimer le cours de la base de données
-      cours
-        .destroy()
+      Test.destroy()
         .then(() => {
           res.status(200).json({
-            message: "Cours supprimé avec succès",
+            message: "Test supprimé avec succès",
           });
         })
         .catch((err) => {
@@ -70,9 +85,78 @@ function deleteCours(req, res) {
       });
     });
 }
+//  ajouter la correction
+function uploadTestCorrection(req, res, next) {
+  const id = req.params.id;
+  const userId = req.userData.userId;
 
-//  faire la mise a jour d'un cours ou les informations du cours
-function updateCours(req, res, next) {
+  const updatedValue = {
+    namePdfCorrection: req.file.filename,
+  };
+
+  // Vérifier s'il y a un nouveau fichier PDF téléchargé
+  if (req.file) {
+    const filePath = path.join(__dirname, "../uploads", req.file.filename);
+    updatedValue.namePdfCorrection = req.file.filename;
+
+    // Vérifier si le cours existe et s'il a déjà un fichier PDF
+    models.Test.findOne({ where: { id: id, idEnseignant: userId } })
+      .then((td) => {
+        if (td) {
+          // S'il y a déjà un fichier PDF, supprimer l'ancien fichier
+          if (td.namePdfCorrection) {
+            const oldFilePath = path.join(
+              __dirname,
+              "../uploads",
+              td.namePdfCorrection
+            );
+            fs.unlink(oldFilePath, (err) => {
+              if (err) {
+                console.error(
+                  "Erreur lors de la suppression de l'ancien fichier PDF :",
+                  err
+                );
+              }
+            });
+          }
+        }
+
+        // Mettre à jour les informations du cours
+        models.Test.update(updatedValue, {
+          where: { id: id, idEnseignant: userId },
+        })
+          .then((result) => {
+            if (result == 1) {
+              res.status(200).json({
+                message: "Test ajouté avec succès",
+                cours: updatedValue,
+              });
+            } else {
+              res.status(404).json({ message: "Test non trouvé" });
+            }
+          })
+          .catch((err) => {
+            res.status(500).json({
+              message:
+                "Une erreur s'est produite lors de la mise à jour du cours",
+              error: err,
+            });
+          });
+      })
+      .catch((err) => {
+        console.error(
+          "Une erreur s'est produite lors de la recherche du cours :",
+          err
+        );
+        res.status(500).json({
+          message: "Une erreur s'est produite lors de la mise à jour du cours",
+          error: err,
+        });
+      });
+  }
+}
+//  mise a jour du fichier test ou les information
+function updateTest(req, res, next) {
   const id = req.params.id;
   const userId = req.userData.userId;
 
@@ -87,15 +171,15 @@ function updateCours(req, res, next) {
     updatedValue.namePdf = req.file.filename;
 
     // Vérifier si le cours existe et s'il a déjà un fichier PDF
-    models.Cours.findOne({ where: { id: id, idEnseignant: userId } })
-      .then((cours) => {
-        if (cours) {
+    models.Test.findOne({ where: { id: id, idEnseignant: userId } })
+      .then((test) => {
+        if (test) {
           // S'il y a déjà un fichier PDF, supprimer l'ancien fichier
-          if (cours.namePdf) {
+          if (test.namePdf) {
             const oldFilePath = path.join(
               __dirname,
               "../uploads",
-              cours.namePdf
+              test.namePdf
             );
             fs.unlink(oldFilePath, (err) => {
               if (err) {
@@ -109,17 +193,17 @@ function updateCours(req, res, next) {
         }
 
         // Mettre à jour les informations du cours
-        models.Cours.update(updatedValue, {
+        models.Test.update(updatedValue, {
           where: { id: id, idEnseignant: userId },
         })
           .then((result) => {
             if (result == 1) {
               res.status(200).json({
-                message: "Cours mis à jour avec succès",
+                message: "Test mis à jour avec succès",
                 cours: updatedValue,
               });
             } else {
-              res.status(404).json({ message: "Cours non trouvé" });
+              res.status(404).json({ message: "test non trouvé" });
             }
           })
           .catch((err) => {
@@ -142,17 +226,17 @@ function updateCours(req, res, next) {
       });
   } else {
     // Mettre à jour les informations du cours sans changer le fichier PDF
-    models.Cours.update(updatedValue, {
+    models.Test.update(updatedValue, {
       where: { id: id, idEnseignant: userId },
     })
       .then((result) => {
         if (result == 1) {
           res.status(200).json({
-            message: "Cours mis à jour avec succès",
+            message: "Test mis à jour avec succès",
             cours: updatedValue,
           });
         } else {
-          res.status(404).json({ message: "Cours non trouvé" });
+          res.status(404).json({ message: "Test non trouvé" });
         }
       })
       .catch((err) => {
@@ -163,27 +247,10 @@ function updateCours(req, res, next) {
       });
   }
 }
-
-// afficher tout les titres existant sur la bdd
-function showAllTitleCours(req, res) {
-  models.Cours.findAll()
-    .then((results) => {
-      const titles = results.map((cours) => cours.title);
-      res.status(200).json(titles);
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message:
-          "Une erreur s'est produite lors de la récupération des titres des cours",
-        error: err,
-      });
-    });
-}
-
-// afficher un cours specifique existant sur la bdd
+// afficher un Test specifique existant sur la bdd
 function show(req, res) {
   const id = req.params.id;
-  models.Cours.findByPk(id)
+  models.Test.findByPk(id)
     .then((result) => {
       {
         result
@@ -198,16 +265,15 @@ function show(req, res) {
       });
     });
 }
-
 //  tester sur l'existance d'un cours avant de faire la mise a jour
-function TestUploadUpdate(req, res, next) {
+function TestuploadUpdate(req, res, next) {
   const id = req.params.id;
   const userId = req.userData.userId;
 
-  models.Cours.findOne({ where: { id: id, idEnseignant: userId } })
-    .then((cours) => {
-      if (!cours) {
-        return res.status(404).json({ message: "Cours non trouvé" });
+  models.Test.findOne({ where: { id: id, idEnseignant: userId } })
+    .then((td) => {
+      if (!td) {
+        return res.status(404).json({ message: "test non trouvé" });
       } else {
         // Votre logique de téléchargement du fichier PDF ici
         // Vous pouvez utiliser req.file pour accéder au fichier téléchargé
@@ -223,10 +289,10 @@ function TestUploadUpdate(req, res, next) {
     });
 }
 module.exports = {
-  upload: upload,
-  deleteCours: deleteCours,
-  updateCours: updateCours,
-  showAllTitleCours: showAllTitleCours,
-  TestUploadUpdate: TestUploadUpdate,
+  uploadTest: uploadTest,
+  deleteTest: deleteTest,
+  uploadTestCorrection: uploadTestCorrection,
+  TestuploadUpdate: TestuploadUpdate,
+  updateTest: updateTest,
   show: show,
 };
