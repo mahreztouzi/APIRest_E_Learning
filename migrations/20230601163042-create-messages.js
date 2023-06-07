@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Commentaires", {
+    await queryInterface.createTable("Messages", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,27 +12,29 @@ module.exports = {
       contenu: {
         type: Sequelize.STRING,
       },
-      idCours: {
+      idExpediteur: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
         references: {
-          model: "Cours",
-          key: "id",
+          model: "Users", // Nom de la table de référence
+          key: "id", // Colonne de référence dans la table de référence
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      idUser: {
+      idRecepteur: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        unique: false,
         references: {
-          model: "Users",
-          key: "id",
+          model: "Users", // Nom de la table de référence
+          key: "id", // Colonne de référence dans la table de référence
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
+      },
+      userType: {
+        allowNull: false,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
@@ -45,6 +47,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Commentaires");
+    await queryInterface.dropTable("Messages");
   },
 };

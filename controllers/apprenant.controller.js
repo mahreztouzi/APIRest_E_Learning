@@ -1,16 +1,18 @@
-const moodels = require("../models");
+const models = require("../models");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Validator = require("fastest-validator");
 
 function signUp(req, res) {
   const user = {
-    name: req.body.name,
+    nom: req.body.nom,
+    prenom: req.body.prenom,
     email: req.body.email,
     password: req.body.password,
   };
   const schema = {
-    name: { type: "string", optional: false, max: 20 },
+    nom: { type: "string", optional: false, max: 20 },
+    prenom: { type: "string", optional: false, max: 20 },
     email: { type: "email", optional: false, max: 30 },
     password: { type: "string", optional: false, min: 6 },
   };
@@ -20,43 +22,45 @@ function signUp(req, res) {
 
   if (validationResponse !== true) {
     return res.status(400).json({
-      message: "validation failed",
+      message: "Validation failed",
       errors: validationResponse,
     });
   }
 
-  moodels.Enseignant.findOne({ where: { email: req.body.email } })
+  models.Apprenant.findOne({ where: { email: req.body.email } })
     .then((result) => {
       if (result) {
         return res.status(409).json({
-          message: "email already exists",
+          message: "Email already exists",
         });
       } else {
         bcryptjs.genSalt(10, function (err, salt) {
           bcryptjs.hash(req.body.password, salt, function (err, hash) {
             const userData = {
-              name: req.body.name,
-              role: "professeur",
+              name: req.body.nom,
+              role: "apprenant",
             };
-            moodels.Users.create(userData)
+            models.Users.create(userData)
               .then((result) => {
                 const user = {
-                  name: req.body.name,
+                  nom: req.body.nom,
+                  prenom: req.body.prenom,
                   email: req.body.email,
+                  role: "apprenant",
                   userId: result.id,
                   password: hash,
                 };
-                moodels.Enseignant.create(user)
+                models.Apprenant.create(user)
                   .then((userResult) => {
                     res.status(201).json({
-                      message: "user created successfully",
+                      message: "User created successfully",
                       TableUsers: result,
-                      TableEnseigants: userResult,
+                      TableApprenant: userResult,
                     });
                   })
                   .catch((err) => {
                     res.status(500).json({
-                      message: "erreur",
+                      message: "Error",
                       error: err,
                     });
                   });
@@ -64,7 +68,7 @@ function signUp(req, res) {
 
               .catch((err) => {
                 res.status(500).json({
-                  message: "erreur",
+                  message: "Error",
                   error: err,
                 });
               });
@@ -74,7 +78,7 @@ function signUp(req, res) {
     })
     .catch((err) => {
       res.status(500).json({
-        message: "erreur",
+        message: "Error",
         error: err,
       });
     });
@@ -95,36 +99,35 @@ function login(req, res) {
 
   if (validationResponse !== true) {
     return res.status(400).json({
-      message: "validation failed",
+      message: "Validation failed",
       errors: validationResponse,
     });
   }
 
-  moodels.Enseignant.findOne({
+  models.Apprenant.findOne({
     where: { email: req.body.email },
     include: {
-      model: moodels.Users,
+      model: models.Users,
       as: "User",
     },
   })
     .then((user) => {
       if (user === null) {
         return res.status(401).json({
-          message: "invalide email",
+          message: "Invalid email",
         });
       } else {
         bcryptjs.compare(
           req.body.password,
           user.password,
-
           function (err, result) {
             if (result) {
               const token = jwt.sign(
                 {
                   email: user.email,
                   userId: user.User.id,
-                  enseignantId: user.id,
-
+                  apprenantId: user.id,
+                  roleAp: user.role,
                   name: user.User.name,
                   role: user.User.role,
                 },
@@ -133,21 +136,21 @@ function login(req, res) {
                   console.log({
                     email: user.email,
                     userId: user.User.id,
-                    enseignantId: user.id,
-
+                    apprenantId: user.id,
+                    roleAp: user.role,
                     name: user.User.name,
                     role: user.User.role,
                   });
 
                   res.status(200).json({
-                    message: "login succefuly",
+                    message: "Login successful",
                     token: token,
                   });
                 }
               );
             } else {
               return res.status(401).json({
-                message: "invalide password",
+                message: "Invalid password",
               });
             }
           }
@@ -156,8 +159,8 @@ function login(req, res) {
     })
     .catch((err) => {
       res.status(500).json({
-        message: "something went wrong",
-        erreur: err,
+        message: "Something went wrong",
+        error: err,
       });
     });
 }

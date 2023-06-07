@@ -2,7 +2,7 @@
   "development": {
     "username": "root",
     "password": null,
-    "database": "api_essai",
+    "database": "api_rest_elearning",
     "host": "127.0.0.1",
     "dialect": "mysql"
   },

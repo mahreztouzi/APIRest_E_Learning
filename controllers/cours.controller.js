@@ -7,8 +7,9 @@ function upload(req, res) {
     namePdf: req.file.filename,
     description: req.body.description,
     title: req.body.title,
-    idEnseignant: req.userData.userId,
+    idEnseignant: req.userData.enseignantId,
   };
+  console.log(req.userData);
 
   console.log(req.userData);
 
