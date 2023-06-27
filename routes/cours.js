@@ -11,15 +11,24 @@ router.post(
   coursController.upload
 );
 
-router.delete("/uploads/:id", checkAuth.checkAuth, coursController.deleteCours);
+router.delete("/:id", checkAuth.checkAuth, coursController.deleteCours);
 router.patch(
-  "/uploads/:id",
+  "/:id",
   checkAuth.checkAuth,
   coursController.TestUploadUpdate,
   coursUploader.upload.single("pdf"),
   coursController.updateCours
 );
+// router.get("/:id", checkAuth.checkAuth, coursController.show);
+// router.get("/upload", coursController.showAllTitleCours);
+
 router.get("/:id", checkAuth.checkAuth, coursController.show);
-router.get("/uploads", coursController.showAllTitleCours);
+router.get("/titles", coursController.showAllTitleCours);
+router.get(
+  "/enseignant/:enseignantId",
+  checkAuth.checkAuth,
+  coursController.getCoursByEnseignant
+);
+router.get("/", checkAuth.checkAuth, coursController.getAllCours);
 
 module.exports = router;

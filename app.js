@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 
@@ -12,6 +13,12 @@ const testRoute = require("./routes/test");
 const quizRoute = require("./routes/quiz");
 const commentRoute = require("./routes/comment");
 const messageRoute = require("./routes/messages");
+// Activez CORS pour toutes les routes
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 app.use(bodyParser.json());
 app.use("/uploads", express.static("uploads"));

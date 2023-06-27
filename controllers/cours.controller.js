@@ -5,6 +5,7 @@ const path = require("path");
 function upload(req, res) {
   const cours = {
     namePdf: req.file.filename,
+
     description: req.body.description,
     title: req.body.title,
     idEnseignant: req.userData.enseignantId,
@@ -30,8 +31,8 @@ function upload(req, res) {
 //  suppresion d'un cours
 function deleteCours(req, res) {
   const coursId = req.params.id;
-
-  models.Cours.findByPk(coursId)
+  const userId = req.userData.userId;
+  models.Cours.findOne({ where: { id: coursId, idEnseignant: userId } })
     .then((cours) => {
       if (!cours) {
         return res.status(404).json({
@@ -182,20 +183,53 @@ function showAllTitleCours(req, res) {
 }
 
 // afficher un cours specifique existant sur la bdd
-function show(req, res) {
-  const id = req.params.id;
-  models.Cours.findByPk(id)
-    .then((result) => {
-      {
-        result
-          ? res.status(200).json(result)
-          : res.status(404).json({ message: "not found" });
-      }
+// function show(req, res) {
+//   const id = req.params.id;
+//   models.Cours.findByPk(id)
+//     .then((result) => {
+//       {
+//         result
+//           ? res.status(200).json(result)
+//           : res.status(404).json({ message: "not found" });
+//       }
+//     })
+//     .catch((err) => {
+//       res.status(500).json({
+//         message: "something went wrong",
+//         error: err,
+//       });
+//     });
+// }
+// n'eest pas interresentes psk elle existes deja dans getAllCours suffit juste de faire un controle sur le prof et son cours
+function getCoursByEnseignant(req, res) {
+  const enseignantId = req.params.enseignantId;
+
+  models.Cours.findAll({
+    where: { idEnseignant: enseignantId },
+  })
+    .then((cours) => {
+      res.status(200).json(cours);
     })
     .catch((err) => {
       res.status(500).json({
-        message: "something went wrong",
+        message:
+          "Une erreur s'est produite lors de la récupération des cours de l'enseignant",
         error: err,
+      });
+    });
+}
+// recuperer tout les cours
+function getAllCours(req, res) {
+  models.Cours.findAll({
+    include: models.Enseignant, // Inclure le modèle Sequelize de l'enseignant
+  })
+    .then((cours) => {
+      res.status(200).json(cours);
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "Une erreur s'est produite lors de la récupération des cours",
+        error: err.message, // Utilisation de err.message pour obtenir le message d'erreur spécifique
       });
     });
 }
@@ -230,4 +264,6 @@ module.exports = {
   showAllTitleCours: showAllTitleCours,
   TestUploadUpdate: TestUploadUpdate,
   show: show,
+  getCoursByEnseignant: getCoursByEnseignant,
+  getAllCours: getAllCours,
 };

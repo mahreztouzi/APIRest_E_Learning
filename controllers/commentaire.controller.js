@@ -17,6 +17,7 @@ function createComment(req, res) {
       } else {
         models.Commentaire.create(comment)
           .then((result) => {
+            console.log(result);
             res.status(201).json({
               message: "Comment created successfully",
               comment: result,
@@ -39,18 +40,34 @@ function createComment(req, res) {
 }
 
 // afficher un commentaire
-function readComment(req, res) {
-  const id = req.params.id;
+// function readComment(req, res) {
+//   const id = req.params.id;
 
-  models.Commentaire.findByPk(id)
-    .then((result) => {
-      if (result) {
-        res.status(200).json(result);
-      } else {
-        res.status(404).json({
-          message: "Comment not found!",
-        });
-      }
+//   models.Commentaire.findByPk(id)
+//     .then((result) => {
+//       if (result) {
+//         res.status(200).json(result);
+//       } else {
+//         res.status(404).json({
+//           message: "Comment not found!",
+//         });
+//       }
+//     })
+//     .catch((error) => {
+//       res.status(500).json({
+//         message: "Something went wrong!",
+//       });
+//     });
+// }
+function readComment(req, res) {
+  const idCours = req.params.id;
+
+  models.Commentaire.findAll({
+    where: { idCours: idCours },
+    include: models.Users,
+  })
+    .then((comments) => {
+      res.status(200).json(comments);
     })
     .catch((error) => {
       res.status(500).json({
@@ -58,7 +75,6 @@ function readComment(req, res) {
       });
     });
 }
-
 // update un commentaire
 function updateComment(req, res) {
   const id = req.params.id;
