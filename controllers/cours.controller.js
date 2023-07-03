@@ -31,7 +31,7 @@ function upload(req, res) {
 //  suppresion d'un cours
 function deleteCours(req, res) {
   const coursId = req.params.id;
-  const userId = req.userData.userId;
+  const userId = req.userData.enseignantId;
   models.Cours.findOne({ where: { id: coursId, idEnseignant: userId } })
     .then((cours) => {
       if (!cours) {
@@ -76,7 +76,8 @@ function deleteCours(req, res) {
 //  faire la mise a jour d'un cours ou les informations du cours
 function updateCours(req, res, next) {
   const id = req.params.id;
-  const userId = req.userData.userId;
+  const userId = req.userData.enseignantId;
+  console.log("userData", req.userData);
 
   const updatedValue = {
     description: req.body.description,
@@ -87,7 +88,7 @@ function updateCours(req, res, next) {
   if (req.file) {
     const filePath = path.join(__dirname, "../uploads", req.file.filename);
     updatedValue.namePdf = req.file.filename;
-
+    //
     // Vérifier si le cours existe et s'il a déjà un fichier PDF
     models.Cours.findOne({ where: { id: id, idEnseignant: userId } })
       .then((cours) => {
@@ -145,7 +146,7 @@ function updateCours(req, res, next) {
   } else {
     // Mettre à jour les informations du cours sans changer le fichier PDF
     models.Cours.update(updatedValue, {
-      where: { id: id, idEnseignant: userId },
+      where: { id: id, enseignantId: userId },
     })
       .then((result) => {
         if (result == 1) {
@@ -183,23 +184,23 @@ function showAllTitleCours(req, res) {
 }
 
 // afficher un cours specifique existant sur la bdd
-// function show(req, res) {
-//   const id = req.params.id;
-//   models.Cours.findByPk(id)
-//     .then((result) => {
-//       {
-//         result
-//           ? res.status(200).json(result)
-//           : res.status(404).json({ message: "not found" });
-//       }
-//     })
-//     .catch((err) => {
-//       res.status(500).json({
-//         message: "something went wrong",
-//         error: err,
-//       });
-//     });
-// }
+function show(req, res) {
+  const id = req.params.id;
+  models.Cours.findByPk(id)
+    .then((result) => {
+      {
+        result
+          ? res.status(200).json(result)
+          : res.status(404).json({ message: "not found" });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: "something went wrong",
+        error: err,
+      });
+    });
+}
 // n'eest pas interresentes psk elle existes deja dans getAllCours suffit juste de faire un controle sur le prof et son cours
 function getCoursByEnseignant(req, res) {
   const enseignantId = req.params.enseignantId;
@@ -237,7 +238,7 @@ function getAllCours(req, res) {
 //  tester sur l'existance d'un cours avant de faire la mise a jour
 function TestUploadUpdate(req, res, next) {
   const id = req.params.id;
-  const userId = req.userData.userId;
+  const userId = req.userData.enseignantId;
 
   models.Cours.findOne({ where: { id: id, idEnseignant: userId } })
     .then((cours) => {
