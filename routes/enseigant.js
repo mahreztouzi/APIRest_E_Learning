@@ -2,6 +2,6 @@ const express = require("express");
 const router = express.Router();
 const enseignantController = require("../controllers/enseigant.controller");
 
-router.post("/sign-up", enseignantController.signUp);
-router.post("/login", enseignantController.login);
+router.post("/:email", enseignantController.signUp);
+router.post("/", enseignantController.login);
 module.exports = router;

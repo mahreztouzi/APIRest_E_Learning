@@ -5,7 +5,7 @@ const checkAuth = require("../middleware/check-auth");
 const router = express.Router();
 
 router.post(
-  "/uploads",
+  "/",
   checkAuth.checkAuth,
   coursUploader.upload.single("pdf"),
   coursController.upload
@@ -23,12 +23,12 @@ router.patch(
 // router.get("/upload", coursController.showAllTitleCours);
 
 router.get("/:id", checkAuth.checkAuth, coursController.show);
-router.get("/titles", coursController.showAllTitleCours);
-router.get(
-  "/enseignant/:enseignantId",
-  checkAuth.checkAuth,
-  coursController.getCoursByEnseignant
-);
+// router.get("/titles", coursController.showAllTitleCours);
+// router.get(
+//   "/enseignant/:enseignantId",
+//   checkAuth.checkAuth,
+//   coursController.getCoursByEnseignant
+// );
 router.get("/", checkAuth.checkAuth, coursController.getAllCours);
 
 module.exports = router;

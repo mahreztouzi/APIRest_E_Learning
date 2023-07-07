@@ -4,9 +4,10 @@ const jwt = require("jsonwebtoken");
 const Validator = require("fastest-validator");
 
 function signUp(req, res) {
+  const email = req.params.email;
   const user = {
+    email: email,
     name: req.body.name,
-    email: req.body.email,
     password: req.body.password,
   };
   const schema = {
@@ -25,7 +26,7 @@ function signUp(req, res) {
     });
   }
 
-  moodels.Enseignant.findOne({ where: { email: req.body.email } })
+  moodels.Enseignant.findOne({ where: { email: email } })
     .then((result) => {
       if (result) {
         return res.status(409).json({
@@ -42,7 +43,8 @@ function signUp(req, res) {
               .then((result) => {
                 const user = {
                   name: req.body.name,
-                  email: req.body.email,
+                  // email: req.body.email,
+                  email: req.params.email,
                   userId: result.id,
                   password: hash,
                 };

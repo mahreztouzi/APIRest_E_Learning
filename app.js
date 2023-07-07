@@ -14,6 +14,7 @@ const quizRoute = require("./routes/quiz");
 const commentRoute = require("./routes/comment");
 const messageRoute = require("./routes/messages");
 const userRoute = require("./routes/user");
+const adminRoute = require("./routes/admin");
 // Activez CORS pour toutes les routes
 app.use(
   cors({
@@ -32,5 +33,5 @@ app.use("/comment", commentRoute);
 app.use("/message", messageRoute);
 app.use("/apprenant", apprenantRoute);
 app.use("/user", userRoute);
-
+app.use("/admin", adminRoute);
 module.exports = app;

@@ -7,7 +7,7 @@ function signUp(req, res) {
   const user = {
     nom: req.body.nom,
     prenom: req.body.prenom,
-    email: req.body.email,
+    email: req.params.email,
     password: req.body.password,
   };
   const schema = {
@@ -27,7 +27,7 @@ function signUp(req, res) {
     });
   }
 
-  models.Apprenant.findOne({ where: { email: req.body.email } })
+  models.Apprenant.findOne({ where: { email: req.params.email } })
     .then((result) => {
       if (result) {
         return res.status(409).json({
@@ -45,7 +45,7 @@ function signUp(req, res) {
                 const user = {
                   nom: req.body.nom,
                   prenom: req.body.prenom,
-                  email: req.body.email,
+                  email: req.params.email,
                   role: "apprenant",
                   userId: result.id,
                   password: hash,
