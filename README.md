@@ -27,24 +27,14 @@ APIRest_E_Learning est une API permettant de gérer des cours en ligne.
 
 Voici la liste des routes disponibles :
 
-### GET /courses
+## Exemples de Ressources :
 
-- `/cours/uploads` : POST - Ajouter un nouveau cours.
-- `/cours/uploads/id` : PATCH - Modifer un nouveau cours.-
-- `/cours/uploads/id` : GET - Lire un nouveau cours.
-- `/cours/uploads/id` : DELETE - Supprimer un nouveau cours.
+### /cours
 
-### GET /TD
-
-- `/td/uploads` : POST - Ajouter un nouveau td.
-- `/td/uploads/id` : PATCH - Modifer un nouveau td.-
-- `/td/id` : GET - Lire un nouveau td.
-- `/td/uploads/id` : DELETE - Supprimer un nouveau td.
-- `/uploads/correction/:id` : POST - Ajouter une correction pour un td.
-
-## Contribuer
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou à proposer une pull request.
+- POST `/cours` : - Ajouter un nouveau cours.
+- PATCH `/cours/id` : - Modifer un nouveau cours.-
+- GET `/cours/id` : - Lire un nouveau cours.
+- DELETE `/cours/id` : - Supprimer un nouveau cours.
 
 ## Auteur
 
