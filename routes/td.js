@@ -5,14 +5,14 @@ const checkAuth = require("../middleware/check-auth");
 const router = express.Router();
 // poster un nouveau td
 router.post(
-  "/uploads",
+  "/",
   checkAuth.checkAuth,
   coursUploader.upload.single("pdf"),
   TdController.uploadTd
 );
 // poster une correction ou modifier une correction
 router.patch(
-  "/uploads/correction/:id",
+  "/correction/:id",
   checkAuth.checkAuth,
   TdController.TestuploadUpdate,
   coursUploader.upload.single("pdf"),
@@ -20,7 +20,7 @@ router.patch(
 );
 // mise a jour td
 router.patch(
-  "/uploads/:id",
+  "/:id",
   checkAuth.checkAuth,
   TdController.TestuploadUpdate,
   coursUploader.upload.single("pdf"),
@@ -29,6 +29,6 @@ router.patch(
 // afficher un td
 router.get("/:id", checkAuth.checkAuth, TdController.show);
 // supprimer un td
-router.delete("/uploads/:id", checkAuth.checkAuth, TdController.deleteTd);
+router.delete("/:id", checkAuth.checkAuth, TdController.deleteTd);
 
 module.exports = router;
